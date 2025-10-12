@@ -1,8 +1,8 @@
 version: '3'
 services:
-  http-server:
+  web:
     build: .
     ports:
       - "8080:8080"
     volumes:
-      - ./content:/app/content     # Share your local 'content' folder with the container
+      - ./content:/app/content  # adjust /app/content to match your Dockerfile WORKDIR if different

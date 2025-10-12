@@ -1,0 +1,8 @@
+version: '3'
+services:
+  http-server:
+    build: .
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./content:/app/content     # Share your local 'content' folder with the container

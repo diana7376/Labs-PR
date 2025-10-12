@@ -39,6 +39,11 @@ else:
 HOST = '0.0.0.0'
 PORT = 8080
 
+
+print(f" Server started on http://{HOST}:{PORT}")
+print(f" Serving files from: {os.path.abspath(content_dir)}")
+print(" Press Ctrl+C to stop the server")
+
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 server_socket.bind((HOST, PORT))

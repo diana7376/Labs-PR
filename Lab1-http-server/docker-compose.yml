@@ -5,4 +5,4 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ./content:/app/content  # adjust /app/content to match your Dockerfile WORKDIR if different
+      - ./content:/app/content

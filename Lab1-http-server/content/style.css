@@ -59,3 +59,42 @@ a.file-link:hover {
 .back-button:hover {
     color: #5c2626;
 }
+.error-box {
+            max-width: 650px;
+            background: #fff;
+            margin: 40px auto;
+            border-radius: 16px;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.07);
+            padding: 2rem 2.5rem 2.5rem 2.5rem;
+            text-align: center;
+        }
+.error-code {
+    font-size: 5em;
+    color: #0a467e;
+    font-weight: bold;
+    letter-spacing: 8px;
+}
+.error-msg {
+    font-size: 1.5em;
+    margin-bottom: 1.2em;
+}
+.error-sub {
+    color: #888;
+    margin-bottom: 2em;
+}
+.error-back-button {
+    background: inherit;
+    color: #0a467e;
+    font-weight: 500;
+    text-decoration: none;
+    border: none;
+    font-size: 1.1em;
+    padding: 0.7em 2em;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.11);
+    cursor: pointer;
+    margin-top: 1em;
+}
+.error-back-button:hover {
+    color: #28a745;
+}

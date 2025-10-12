@@ -106,15 +106,41 @@ while True:
             response = "HTTP/1.1 500 Internal Server Error\r\n\r\n"
             client_conn.sendall(response.encode())
     else:
-        response_body = b"<h1>404 Not Found</h1><p>The requested file or folder does not exist.</p>"
+        response_body = b"""
+        <div class="error-box">
+            <div class="error-code">404</div>
+            <div class="error-msg">File or Folder Not Found</div>
+            <div class="error-sub">Sorry, the requested resource does not exist on this server.</div>
+            <a href="/" class="error-back-button">&#8592; Go to Homepage</a>
+        </div>
+        """
+
+        # Compose a full HTML document
+        html_document = f"""<!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <title>404 Not Found</title>
+            <link rel="stylesheet" href="style.css">
+        </head>
+        <body>
+        {response_body.decode()}
+        </body>
+        </html>
+        """
+
+        response_body_bytes = html_document.encode('utf-8')
+
         response_headers = [
             "HTTP/1.1 404 Not Found",
-            "Content-Type: text/html",
-            f"Content-Length: {len(response_body)}",
+            "Content-Type: text/html; charset=UTF-8",
+            f"Content-Length: {len(response_body_bytes)}",
             "Connection: close",
-            "", ""
+            "",  # blank line: headers end here
+            ""  # blank line: ensures separation before body
         ]
-        response = "\r\n".join(response_headers).encode() + response_body
+
+        response = "\r\n".join(response_headers).encode('utf-8') + response_body_bytes
         client_conn.sendall(response)
 
     client_conn.close()

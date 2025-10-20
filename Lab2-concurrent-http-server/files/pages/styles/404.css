@@ -1,0 +1,41 @@
+body {
+    background: #f8f9fa;
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+.notfound-container {
+    max-width: 400px;
+    margin: 80px auto;
+    text-align: center;
+    background: #fff;
+    border: 2px solid #2872f7;
+    border-radius: 10px;
+    box-shadow: 2px 4px 0 0 #2872f7;
+    padding: 37px 25px 30px 25px;
+}
+.notfound-container h1 {
+    color: #2872f7;
+    font-size: 2em;
+    border-bottom: 1px solid #c2d2f6;
+    padding-bottom: 8px;
+}
+.notfound-container p {
+    color: #3c4551;
+    font-size: 1.1em;
+    margin-top: 22px;
+    margin-bottom: 30px;
+}
+.notfound-container a {
+    color: #2872f7;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1.1em;
+    border: 1px solid #2872f7;
+    border-radius: 6px;
+    padding: 7px 17px;
+    background: #dbe9fe;
+    transition: background 0.2s, color 0.2s;
+}
+.notfound-container a:hover {
+    background: #2872f7;
+    color: #fff;
+}

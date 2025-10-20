@@ -3,14 +3,21 @@
 <head>
     <title>Directory Listing</title>
     <link rel="stylesheet" href="/pages/styles/listing.css">
+<!--    <meta http-equiv="refresh" content="2">-->
 </head>
+
 <body>
     <div class="container">
-        <div class="header">{{directory}}</div>
+        <div class="header">
+            <div class="header-row">
+                <span class="header-title">{{directory}}</span>
+            </div>
+        </div>
+
         <ul class="listing">
             {{items}}
         </ul>
-<!--        <div class="footer">my directory structure</div>-->
+        <div class="footer">my directory structure</div>
     </div>
 </body>
 </html>

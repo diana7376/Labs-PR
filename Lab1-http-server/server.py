@@ -44,14 +44,14 @@ print(f" Server started on http://{HOST}:{PORT}")
 print(f" Serving files from: {os.path.abspath(content_dir)}")
 print(" Press Ctrl+C to stop the server")
 
-server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-server_socket.bind((HOST, PORT))
+server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # Create TCP socket
+server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) # Reuse address
+server_socket.bind((HOST, PORT)) # Bind to address and port
 server_socket.listen(1)
 print(f"Serving HTTP on {HOST} port {PORT} (http://localhost:{PORT}/) ...")
 
 while True:
-    client_conn, client_addr = server_socket.accept()
+    client_conn, client_addr = server_socket.accept() # Accept client connection
     request_data = client_conn.recv(8192).decode('utf-8')
 
     request_lines = request_data.splitlines()

@@ -33,9 +33,17 @@ def http_client(host, port, filename):
 
     headers_raw = response[:split_index].decode(errors="ignore")
     body = response[split_index+4:]
+
     print("---- Response Headers ----")
     print(headers_raw)
     print("--------")
+
+    # Extract the status line and check it
+    status_line = headers_raw.splitlines()[0] if headers_raw.strip() else ""
+    if "200 OK" not in status_line:
+        print("Download failed: Server response was not OK.")
+        print("Server response:", status_line)
+        return  # Do not write the file!
 
     # Decide what to do based on file extension
     if filename.endswith(".html"):
@@ -53,7 +61,7 @@ def http_client(host, port, filename):
 
 if __name__ == "__main__":
     if len(sys.argv) < 4:
-        print("Usage: python client.py <server_host> <server_port> <filename>")
+        print("Usage: python client.py <host> <port> <filename>")
         print("Example: python client.py localhost 8080 index.html")
         sys.exit(1)
     host = sys.argv[1]

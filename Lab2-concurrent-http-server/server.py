@@ -13,7 +13,7 @@ counter_lock = threading.Lock()
 
 ip_request_times = {}
 rate_lock = threading.Lock()
-RATE_LIMIT = 5
+RATE_LIMIT = 2
 WINDOW_SECONDS = 1
 
 def guess_mime(file_path):

@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>My HTTP File Server</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #3c4551;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            width: 90vw;
+            max-width: 640px;
+            min-width: 300px;
+            min-height: 350px;
+            background: #fff;
+            box-shadow: 2px 4px 0 0 #2872f7;
+            border: 2px solid #2872f7;
+            border-radius: 8px;
+            padding: 0px 0 20px 0;
+            box-sizing: border-box;
+            position: relative;
+        }
+        h1 {
+            color: #2872f7;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.7em;
+            padding: 20px 0 10px 0;
+            border-bottom: 1px solid #2872f7;
+            margin-bottom: 18px;
+        }
+        .description {
+            text-align: center;
+            color: #8aa8dc;
+            margin-bottom: 24px;
+            font-style: italic;
+            font-size: 1.15em;
+            letter-spacing: 0.5px;
+        }
+        h2 {
+            color: #2872f7;
+            border-bottom: 1px solid #c2d2f6;
+            padding-bottom: 10px;
+            margin-top: 30px;
+            font-size: 1.2em;
+            font-weight: 500;
+        }
+        .samples {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin: 16px 0;
+            flex-wrap: wrap;
+        }
+        .samples a {
+            display: inline-block;
+            cursor: pointer;
+            position: relative;
+            text-decoration: none;
+        }
+        .samples img {
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(40, 114, 247, 0.11);
+            transition: transform 0.2s, box-shadow 0.2s;
+            max-height: 140px;
+        }
+        .samples img:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 16px rgba(40, 114, 247, 0.28);
+        }
+        .image-counter {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            background: #dbe9fe;
+            color: #2872f7;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .file-list {
+            list-style: none;
+            padding: 0;
+        }
+        .file-list li {
+            background: #f8f9fa;
+            margin: 8px 0;
+            border-radius: 6px;
+            transition: background 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #c2d2f6;
+        }
+        .file-list li:hover {
+            background: #dbe9fe;
+        }
+        .file-list a {
+            display: block;
+            padding: 12px 16px;
+            color: #2872f7;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1em;
+        }
+        .file-list a:hover {
+            color: #2872f7;
+            background: #e7f0ff;
+            border-radius: 4px;
+        }
+        .directory a {
+            color: #e7b900 !important;
+        }
+        .hit-counter {
+            padding: 12px 16px;
+            color: #8aa8dc;
+            font-size: 14px;
+            min-width: 60px;
+            text-align: right;
+        }
+        .loading {
+            text-align: center;
+            color: #8aa8dc;
+            padding: 10px;
+        }
+        @media (max-width: 640px) {
+            .container {
+                width: 99vw;
+                max-width: 99vw;
+                border-radius: 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to My HTTP File Server!</h1>
+        <p class="description">This is Diana's simple file server. Enjoy :D</p>
+
+        <h2 style="margin-left: 10px; margin-right: 10px"> Sample Images:</h2>
+        <div class="samples" id="images-container">
+            <p class="loading">Loading images...</p>
+        </div>
+
+        <h2 style="margin-left: 10px; margin-right: 10px"> Available Documents:</h2>
+        <ul style="margin-left: 10px; margin-right: 10px" class="file-list" id="documents-container">
+            <li class="loading">Loading documents...</li>
+        </ul>
+    </div>
+
+    <script>
+        let stats = {};
+
+        // Function to load counter data from stats API
+        async function loadCounters() {
+            try {
+                const response = await fetch('/stats');
+                stats = await response.json();
+                updateCounters();
+            } catch (error) {
+                console.error('Error loading counters:', error);
+            }
+        }
+
+        // Function to update all visible counters
+        function updateCounters() {
+            // Update document counters
+            document.querySelectorAll('.hit-counter[data-file]').forEach(counter => {
+                const filename = counter.getAttribute('data-file');
+                const hits = stats[filename] || 0;
+                counter.textContent = `${hits} hits`;
+            });
+
+            // Update image counters
+            document.querySelectorAll('.image-counter[data-file]').forEach(counter => {
+                const filename = counter.getAttribute('data-file');
+                const hits = stats[filename] || 0;
+                counter.textContent = hits;
+            });
+        }
+
+        // Function to load files list dynamically
+        async function loadFilesList() {
+            try {
+                const response = await fetch('/files');
+                const filesData = await response.json();
+
+                renderImages(filesData.images);
+
+                renderDocuments(filesData.documents);
+
+                renderDirectories(filesData.directories);
+
+                updateCounters();
+
+            } catch (error) {
+                console.error('Error loading files list:', error);
+                document.getElementById('images-container').innerHTML = '<p class="loading">Error loading images</p>';
+                document.getElementById('documents-container').innerHTML = '<li class="loading">Error loading documents</li>';
+            }
+        }
+
+        function renderImages(images) {
+            const container = document.getElementById('images-container');
+
+            if (images.length === 0) {
+                container.innerHTML = '<p class="loading">No images available</p>';
+                return;
+            }
+
+            container.innerHTML = images.map(image => `
+                <a href="${encodeURIComponent(image)}" target="_blank">
+                    <img src="${encodeURIComponent(image)}" alt="${image}">
+                    <span class="image-counter" data-file="${image}">0</span>
+                </a>
+            `).join('');
+        }
+
+        function renderDocuments(documents) {
+            const container = document.getElementById('documents-container');
+
+            if (documents.length === 0) {
+                container.innerHTML = '<li class="loading">No documents available</li>';
+                return;
+            }
+
+            container.innerHTML = documents.map(doc => {
+                const icon = getFileIcon(doc);
+                return `
+                    <li>
+                        <a href="${encodeURIComponent(doc)}">${icon} ${doc}</a>
+                        <span class="hit-counter" data-file="${doc}">0 hits</span>
+                    </li>
+                `;
+            }).join('');
+        }
+
+        function renderDirectories(directories) {
+            const container = document.getElementById('documents-container');
+
+            if (directories.length === 0) return;
+
+            const dirHTML = directories.map(dir => `
+                <li class="directory">
+                    <a href="${encodeURIComponent(dir)}/">📁 ${dir}</a>
+                    <span class="hit-counter">--</span>
+                </li>
+            `).join('');
+
+            container.innerHTML += dirHTML;
+        }
+
+        function getFileIcon(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            const icons = {
+                'pdf': '📄',
+                'docx': '📄',
+                'docs': '📄',
+                'html': '🌐',
+                'htm': '🌐'
+            };
+            return icons[ext] || '📄';
+        }
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            await loadFilesList();
+            await loadCounters();
+            setInterval(loadCounters, 3000);
+            setInterval(loadFilesList, 10000);
+        });
+
+        document.addEventListener('click', function(e) {
+            if (e.target.tagName === 'A' || e.target.closest('a')) {
+                setTimeout(loadCounters, 200);
+            }
+        });
+    </script>
+</body>
+</html>

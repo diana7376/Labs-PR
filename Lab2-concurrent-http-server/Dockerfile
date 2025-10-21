@@ -1,12 +1,13 @@
-
 FROM python:3.11-slim
 
 WORKDIR /app
 
-COPY server.py .
+RUN pip install --no-cache-dir requests
 
-# Optionally, copy your serve_directory with test files (or mount later)
-# COPY serve_directory ./files
+COPY concurrent_server.py ./
 
+COPY content/ ./content/
 
-CMD ["python", "server.py", "./files"]
+EXPOSE 8000
+
+CMD ["python", "concurrent_server.py", "thread-pool", "8000", "10"]

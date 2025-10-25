@@ -116,6 +116,126 @@ When the server is running, visiting the root URL displays a clean, modern UI sh
 >![img.png](content%2Ffiles%2Fphotos%2Fimg.png)
 > *Figure 5: Counter matches requests: race condition solved with lock.*
 
+---
+
+## Race Condition Code from `concurrent_server.py`
+
+### ❌ **NAIVE Implementation (Race Condition - NOT Thread-Safe)**
+
+```python
+def increment_file_counter_naive(self, filepath):
+    """NAIVE implementation - NO LOCK - will cause race condition"""
+    current = self.request_counter.get(filepath, 0)
+    time.sleep(0.01)  # Simulates processing delay - makes race condition visible
+    self.request_counter[filepath] = current + 1
+    print(f"   [NAIVE] Thread {threading.current_thread().name}: "
+          f"Read {current}, Writing {current + 1} for {os.path.basename(filepath)}")
+```
+
+**Problem:**
+- Multiple threads read the same `current` value
+- Each thread independently increments and writes back
+- **Result:** Lost updates, incorrect counter values
+
+***
+
+### ✅ **THREAD-SAFE Implementation (Fixed with Lock)**
+
+```python
+def increment_file_counter_safe(self, filepath):
+    """THREAD-SAFE implementation using lock"""
+    with self.counter_lock:
+        current = self.request_counter.get(filepath, 0)
+        time.sleep(0.01)  # Simulates processing - but now protected by lock
+        new_value = current + 1
+        self.request_counter[filepath] = new_value
+        print(f"   [SAFE] Thread {threading.current_thread().name}: "
+              f"Read {current}, Writing {new_value} for {os.path.basename(filepath)}")
+```
+
+**Solution:**
+- `with self.counter_lock:` ensures only ONE thread executes this block at a time
+- Other threads wait until the lock is released
+- **Result:** Every increment is counted correctly
+
+***
+
+### **Lock Initialization (in `__init__`)**
+
+```python
+class ConcurrentHTTPServer:
+    def __init__(self, host='0.0.0.0', port=8000, document_root='content', 
+                 use_thread_pool=True, max_workers=10):
+        # ... other initialization ...
+        
+        # Request counter - will demonstrate race condition
+        self.request_counter = {}
+        self.counter_lock = threading.Lock()  # ← Lock to protect counter
+        
+        # Rate limiting - per IP tracking
+        self.rate_limit_data = defaultdict(lambda: {'requests': [], 'blocked': 0})
+        self.rate_limit_lock = threading.Lock()  # ← Lock for rate limiting
+```
+
+***
+
+### **Usage in `serve_file` Method**
+
+```python
+def serve_file(self, requested_path):
+    # ...
+    try:
+        if os.path.isfile(filepath):
+            # UNCOMMENT THIS to see race condition:
+            # self.increment_file_counter_naive(filepath)
+            
+            # THREAD-SAFE implementation (current):
+            self.increment_file_counter_safe(filepath)
+            
+            return self.serve_single_file(filepath)
+```
+
+***
+
+### **Additional Thread-Safe Operations**
+
+Your code also demonstrates proper locking in other areas:
+
+**1. Rate Limiting (Thread-Safe):**
+```python
+def check_rate_limit(self, client_ip):
+    """Check if client IP has exceeded rate limit (thread-safe)"""
+    with self.rate_limit_lock:
+        current_time = time.time()
+        client_data = self.rate_limit_data[client_ip]
+        
+        # Remove requests older than 1 second
+        client_data['requests'] = [
+            req_time for req_time in client_data['requests']
+            if current_time - req_time < 1.0
+        ]
+        
+        # Check if under rate limit
+        if len(client_data['requests']) >= self.rate_limit:
+            client_data['blocked'] += 1
+            return False
+        
+        # Add current request
+        client_data['requests'].append(current_time)
+        return True
+```
+
+**2. Statistics Tracking (Thread-Safe):**
+```python
+def serve_stats_json(self):
+    try:
+        stats = {}
+        with self.counter_lock:  # ← Protected read
+            for filepath, count in self.request_counter.items():
+                filename = os.path.basename(filepath)
+                stats[filename] = count
+        # ... rest of method
+```
 ***
 
 ### 4. Rate Limiting (429 Too Many Requests)
@@ -134,6 +254,12 @@ When the server is running, visiting the root URL displays a clean, modern UI sh
 
 >![img_5.png](content%2Ffiles%2Fphotos%2Fimg_5.png)
 > *Figure 7: Good client succeeds with all requests at the allowed rate, 0% block rate.*
+
+#### **Demonstrating Per-IP Rate Limiting and Concurrency Control**
+
+The image below demonstrates how the server keeps track of client IP addresses and enforces rate limiting individually for each client. In this experiment, one client IP was used to make a large number of rapid, consecutive requests, quickly exceeding the maximum allowed requests per second and receiving HTTP 429 (Too Many Requests) responses, as seen in the terminal output/logs. At the same time, another client with a different IP address was able to continue sending requests successfully without being affected by the first client’s rate limiting status. This confirms that the server accurately distinguishes between clients based on their IP addresses and applies the rate limiting policy independently, ensuring fair access for all users and immunity to spam from a single IP.
+
+![img_9.jpg](content%2Ffiles%2Fphotos%2Fimg_9.jpg)
 
 #### **429 Error UI**
 

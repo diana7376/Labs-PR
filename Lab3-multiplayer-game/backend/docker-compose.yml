@@ -1,0 +1,13 @@
+services:
+  app:
+    build:
+      context: ../  # Build from project root
+      dockerfile: backend/Dockerfile
+    container_name: memory-scramble
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../:/app  # Mount entire project
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: on-failure

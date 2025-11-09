@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "memory-scramble"
+version = "1.0.0"
+description = "MIT 6.102 Memory Scramble multiplayer game implementation"
+authors = ["Diana <diana.iachim@isa.utm.md>"]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.104.0"
+uvicorn = "^0.24.0"
+pytest = "^7.4.0"
+pytest-asyncio = "^0.21.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.0"
+pytest-cov = "^4.1.0"
+
+# ADD THIS SECTION
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

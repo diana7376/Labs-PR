@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Scramble - MIT 6.102 Lab 3</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ffb6c1 0%, #ff69b4 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+          background: rgba(255,255,255,0.8);
+          backdrop-filter: blur(8px);
+          border-radius: 20px;
+          box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+          padding: 30px;
+          max-width: 800px;
+          width: 100%;
+          transition: box-shadow 0.3s;
+        }
+
+        button {
+            padding: 12px 24px;
+          background: linear-gradient(90deg, #ff9a9e 0%, #fbb1b1 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+          background: linear-gradient(90deg, #ff69b4 20%, #e75480 100%);
+          transform: translateY(-2px) scale(1.05);
+          box-shadow: 0 8px 24px rgba(255,182,193,0.22);
+        }
+
+
+        h1 {
+            text-align: center;
+            color: #ff69b4;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            padding: 10px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #ff69b4;
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .info div {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .info span {
+            color: #ff69b4;
+            font-size: 1.2em;
+        }
+
+        #game-board {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        .board-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .card {
+            width: 80px;
+            height: 80px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            user-select: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Face-down cards (default) */
+        .card {
+            background: linear-gradient(135deg, #ffb6c1 0%, #ff69b4 100%);
+            color: white;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Face-up but NOT matched (temporary) - Yellow */
+        .card.face-up {
+            background: linear-gradient(135deg, #FFD93D 0%, #FFA500 100%);
+            color: #333;
+            border: 3px solid #FF8C00;
+            animation: flipIn 0.3s ease-out;
+        }
+
+        /* Matched cards (controlled by player) - Green */
+        .card.matched {
+            background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+            color: white;
+            border: 3px solid #1B5E20;
+            cursor: not-allowed;
+            animation: matchPulse 0.5s ease-out;
+        }
+
+        /* Removed cards (matched pair removed from board) */
+        .card.removed {
+            background: transparent;
+            border: 2px dashed #ddd;
+            color: #ddd;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        @keyframes flipIn {
+            from {
+                transform: rotateY(90deg);
+            }
+            to {
+                transform: rotateY(0deg);
+            }
+        }
+
+        @keyframes matchPulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        .status {
+            text-align: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .status.error {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .status.success {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+            font-size: 0.9em;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .legend-box {
+            width: 30px;
+            height: 30px;
+            border-radius: 5px;
+        }
+
+        .legend-box.face-down {
+            background: linear-gradient(135deg, #ffb6c1 0%, #ff69b4 100%);
+        }
+
+        .legend-box.temporary {
+            background: linear-gradient(135deg, #FFD93D 0%, #FFA500 100%);
+            border: 2px solid #FF8C00;
+        }
+
+        .legend-box.matched {
+            background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+            border: 2px solid #1B5E20;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Memory Scramble</h1>
+
+
+        <div class="controls">
+            <div class="input-group">
+                <label for="player-id">Player ID:</label>
+                <input type="text" id="player-id" value="player1" placeholder="Enter your ID">
+            </div>
+            <div class="input-group">
+                <label for="board-width">Width:</label>
+                <input type="number" id="board-width" value="4" min="2" max="10">
+            </div>
+            <div class="input-group">
+                <label for="board-height">Height:</label>
+                <input type="number" id="board-height" value="4" min="2" max="10">
+            </div>
+            <button onclick="newGame()">New Game</button>
+            <button onclick="refreshBoard()">Refresh</button>
+        </div>
+
+        <div class="info">
+            <div>Player: <span id="current-player">player1</span></div>
+            <div>Score: <span id="score">0</span></div>
+            <div>Board: <span id="board-size">4x4</span></div>
+        </div>
+
+        <div id="game-board"></div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-box face-down"></div>
+                <span>Face Down</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box temporary"></div>
+                <span>Flipped (Temporary)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box matched"></div>
+                <span>Matched Pair</span>
+            </div>
+        </div>
+
+        <div id="status" class="status">Click "New Game" to start playing!</div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000';
+        let currentGameId = null;
+        let playerId = 'player1';
+
+        // Initialize
+        document.getElementById('player-id').addEventListener('change', (e) => {
+            playerId = e.target.value;
+            document.getElementById('current-player').textContent = playerId;
+        });
+
+        async function newGame() {
+            const width = parseInt(document.getElementById('board-width').value);
+            const height = parseInt(document.getElementById('board-height').value);
+            playerId = document.getElementById('player-id').value;
+
+            try {
+                const response = await fetch(`${API_URL}/games/new`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ width, height, player_id: playerId })
+});
+
+
+
+                const data = await response.json();
+
+                if (data.ok) {
+                    currentGameId = data.game_id;
+                    document.getElementById('board-size').textContent = `${width}x${height}`;
+                    showStatus('Game started! Find matching pairs!', 'success');
+                    renderBoard(data.board);
+                    updateScore(data.scores);
+                } else {
+                    showStatus('Error: ' + data.message, 'error');
+                }
+            } catch (error) {
+                showStatus('Failed to create game: ' + error.message, 'error');
+            }
+        }
+
+        async function flipCard(row, col) {
+    if (!currentGameId) {
+        showStatus('Start a new game first!', 'error');
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_URL}/games/${currentGameId}/flip`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                player_id: playerId,
+                row: row,
+                column: col
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.ok) {
+            renderBoard(data.board);
+            updateScore(data.scores);
+            if (data.game_over) {
+                showStatus(`🎉 Congratulations, ${playerId}! You matched all pairs!`, 'success');
+            } else {
+                showStatus('Card flipped!', 'success');
+            }
+        } else {
+            showStatus('Error: ' + data.message, 'error');
+        }
+    } catch (error) {
+        showStatus('Failed to flip card: ' + error.message, 'error');
+    }
+}
+
+
+       async function refreshBoard() {
+    if (!currentGameId) {
+        showStatus('Start a new game first!', 'error');
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_URL}/games/${currentGameId}/look?player_id=${playerId}`);
+        const data = await response.json();
+
+        if (data.ok) {
+            renderBoard(data.board);
+            updateScore(data.scores);
+            if (data.game_over) {
+                showStatus(`🎉 Congratulations, ${playerId}! You matched all pairs!`, 'success');
+            } else {
+                showStatus('Card flipped!', 'success');
+            }
+        } else {
+            showStatus('Error: ' + data.message, 'error');
+        }
+    } catch (error) {
+        showStatus('Refresh failed: ' + error.message, 'error');
+    }
+}
+
+        function renderBoard(boardData) {
+            const boardElement = document.getElementById('game-board');
+            boardElement.innerHTML = '';
+
+            boardData.forEach((row, y) => {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'board-row';
+
+                row.forEach((space, x) => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+
+                    // CRITICAL FIX: Check controlled_by for true matches
+                    if (space.card === null) {
+                        // Card was removed (matched pair removed from board)
+                        card.classList.add('removed');
+                        card.textContent = '✓';
+                    } else if (space.controlled_by !== null && space.controlled_by !== undefined) {
+                        // Card is MATCHED and controlled by a player (GREEN)
+                        card.classList.add('matched');
+                        card.textContent = space.card;
+                    } else if (space.is_face_up) {
+                        // Card is face-up but NOT matched (temporary - YELLOW)
+                        card.classList.add('face-up');
+                        card.textContent = space.card;
+                    } else {
+                        // Card is face-down (BLUE)
+                        card.textContent = '?';
+                    }
+
+                    // Click handler - only allow clicks on non-matched, non-removed cards
+                    if (!card.classList.contains('matched') && !card.classList.contains('removed')) {
+                        card.addEventListener('click', () => flipCard(y, x));
+                    }
+
+                    rowDiv.appendChild(card);
+                });
+
+                boardElement.appendChild(rowDiv);
+            });
+        }
+
+        function updateScore(scores) {
+            const playerScore = scores[playerId] || 0;
+            document.getElementById('score').textContent = playerScore;
+        }
+
+        function showStatus(message, type = '') {
+            const statusElement = document.getElementById('status');
+            statusElement.textContent = message;
+            statusElement.className = 'status' + (type ? ' ' + type : '');
+        }
+
+    </script>
+</body>
+</html>

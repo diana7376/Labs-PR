@@ -80,25 +80,21 @@ async def flip(board: Board, player_id: str, row: int, column: int) -> str:
         raise RuntimeError("Invalid state")
 
 
-async def _flip_first_card(board: Board, player_id: str, player_state: PlayerState,
-                           x: int, y: int, space) -> str:
+async def _flip_first_card(board: Board, player_id: str, player_state: PlayerState, x: int, y: int, space) -> str:
     """RULE 1."""
     # RULE 1-D: Block if controlled by another
-    while space.controlled_by and space.controlled_by != player_id:
-        await asyncio.sleep(0.01)
-        space = board.get_space(x, y)
-        # Check if card was removed while waiting
-        if space.card is None:
-            raise ValueError(f"Card was removed while waiting")
-
+    if space.controlled_by and space.controlled_by != player_id:
+        raise ValueError(f"Card at ({y}, {x}) is already controlled by {space.controlled_by}")
+    # Check if card was removed while waiting
+    if space.card is None:
+        raise ValueError(f"Card was removed while waiting")
     # RULE 1-B: Flip if face-down
     if not space.is_face_up:
         board.flip_card(x, y)
-
-    board.set_control(x, y, player_id)
+        board.set_control(x, y, player_id)
     player_state.first_card = (x, y, board.get_card(x, y))
-
     return board.get_state_string(player_id)
+
 
 
 async def _flip_second_card(board: Board, player_id: str, player_state: PlayerState,

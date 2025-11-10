@@ -33,7 +33,7 @@ async def test_watch_basic():
     assert result["ok"], "Watch failed"
     assert len(result["board"]) == 4, "Board size wrong"
 
-    print("✅ test_watch_basic PASSED")
+    print(" test_watch_basic PASSED")
 
 
 async def test_watch_multiple_watchers():
@@ -56,7 +56,7 @@ async def test_watch_multiple_watchers():
     results = await asyncio.gather(watch1, watch2, watch3)
 
     assert all(r["ok"] for r in results), "Some watchers failed"
-    print("✅ test_watch_multiple_watchers PASSED")
+    print(" test_watch_multiple_watchers PASSED")
 
 
 async def test_watch_no_change_blocks():
@@ -76,7 +76,7 @@ async def test_watch_no_change_blocks():
     # Cancel the watch
     watch_task.cancel()
 
-    print("✅ test_watch_no_change_blocks PASSED")
+    print(" test_watch_no_change_blocks PASSED")
 
 
 async def test_watch_with_map():
@@ -99,7 +99,7 @@ async def test_watch_with_map():
     result = await watch_task
     assert result["ok"], "Watch failed"
 
-    print("✅ test_watch_with_map PASSED")
+    print(" test_watch_with_map PASSED")
 
 
 if __name__ == "__main__":

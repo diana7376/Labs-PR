@@ -36,12 +36,12 @@ async def serve_game():
 @app.post("/games/new")
 async def create_new_game(request: Request):
     data = await request.json()
-    width = data.get("width", 4)
-    height = data.get("height", 4)
+    width = data.get("width", 3)
+    height = data.get("height", 3)
     player_id = data.get("player_id", "player1")
 
     num_pairs = (width * height) // 2
-    available_cards = ["🎮", "🌈", "🎨", "⭐", "🎪", "🎭", "🎬", "🎸", "⚽", "🏀", "🎲", "🎯"]
+    available_cards = ["🎮", "🌈", "🚚", "🏎", "🚜", "🚂", "🎬", "🚲", "⚽", "🏀", "🎲", "🎯"]
     cards = set(available_cards[:num_pairs])
 
     board = Board(width, height, cards)

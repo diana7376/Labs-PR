@@ -396,3 +396,25 @@ async def test_concurrent_players_with_rules():
 
     await asyncio.gather(player1_moves(), player2_moves())
     board.check_rep()
+
+async def run_all_tests():
+    await test_rule_1a_no_card_fails()
+    await test_rule_1b_flip_face_down_card()
+    await test_rule_1c_take_control_of_face_up_uncontrolled()
+    await test_rule_1d_blocking_when_controlled()
+    await test_rule_2a_second_card_no_card_fails()
+    await test_rule_2b_second_card_controlled_fails()
+    await test_rule_2c_second_card_face_down_flips_up()
+    await test_rule_2d_matching_cards_stay_controlled()
+    await test_rule_2e_non_matching_cards_released()
+    await test_rule_3a_matched_cards_removed()
+    await test_rule_3b_unmatched_cards_flipped_down()
+    await test_rule_3b_doesnt_flip_controlled_cards()
+    await test_complete_game_flow()
+    await test_concurrent_players_with_rules()
+
+def main():
+    asyncio.run(run_all_tests())
+
+if __name__ == "__main__":
+    main()

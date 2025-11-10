@@ -41,7 +41,7 @@ async def test_map_basic():
                     transformed_count += 1
 
     assert transformed_count == 16, f"Only {transformed_count} cards transformed, expected 16"
-    print("✅ test_map_basic PASSED")
+    print(" test_map_basic PASSED")
 
 
 @pytest.mark.asyncio
@@ -77,7 +77,7 @@ async def test_map_identity():
 
     # Original and transformed should match
     assert original_cards == transformed_cards, "Cards changed after identity transform"
-    print("✅ test_map_identity PASSED")
+    print(" test_map_identity PASSED")
 
 
 @pytest.mark.asyncio
@@ -118,7 +118,7 @@ async def test_map_emoji_transform():
     # All transformed cards should be in the emoji_map values
     expected_cards = set(emoji_map.values())
     assert transformed == expected_cards, f"Transformed cards {transformed} don't match expected {expected_cards}"
-    print("✅ test_map_emoji_transform PASSED")
+    print(" test_map_emoji_transform PASSED")
 
 
 @pytest.mark.asyncio
@@ -148,22 +148,22 @@ async def test_map_concurrent_maps():
 
     assert result1["ok"], "First map failed"
     assert result2["ok"], "Second map failed"
-    print("✅ test_map_concurrent_maps PASSED")
+    print(" test_map_concurrent_maps PASSED")
 
 
 if __name__ == "__main__":
-    print("\n🧪 Running map tests...\n")
+    print("\n Running map tests...\n")
     try:
         asyncio.run(test_map_basic())
         asyncio.run(test_map_identity())
         asyncio.run(test_map_emoji_transform())
         asyncio.run(test_map_concurrent_maps())
 
-        print("\n✅ ALL MAP TESTS PASSED!")
-        print("✅ TASK 4 (map) IS COMPLETE!\n")
+        print("\n ALL MAP TESTS PASSED!")
+        print(" TASK 4 (map) IS COMPLETE!\n")
     except AssertionError as e:
-        print(f"\n❌ Test failed: {e}")
+        print(f"\n Test failed: {e}")
     except Exception as e:
-        print(f"\n❌ Error: {e}")
+        print(f"\n Error: {e}")
         import traceback
         traceback.print_exc()

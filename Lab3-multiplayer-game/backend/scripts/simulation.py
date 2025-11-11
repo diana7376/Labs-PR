@@ -10,7 +10,7 @@ Usage:
     or
     cd backend && python -m scripts.simulation
 """
-
+import time
 import random
 from pathlib import Path
 import sys
@@ -177,17 +177,26 @@ def main() -> None:
 
     # Test Case 1: Small 2x2 board (1 pair)
     print("\n>>> Test 1: Small Board (2x2, 1 pair)")
-    simulate_single_player(width=2, height=2, num_unique_cards=1)
+    start_time = time.time()
+    simulate_single_player(width=2, height=2, num_unique_cards=2)
+    end_time = time.time()
+    print(f"⏱️ Time taken: {end_time - start_time:.5f} seconds\n")
     input("Press Enter to continue...\n")
 
     # Test Case 2: Medium 4x4 board (8 pairs)
     print("\n>>> Test 2: Medium Board (4x4, 8 pairs)")
+    start_time = time.time()
     simulate_single_player(width=4, height=4, num_unique_cards=8)
+    end_time = time.time()
+    print(f"⏱️ Time taken: {end_time - start_time:.5f} seconds\n")
     input("Press Enter to continue...\n")
 
     # Test Case 3: Larger 4x6 board (12 pairs)
     print("\n>>> Test 3: Larger Board (4x6, 12 pairs)")
+    start_time = time.time()
     simulate_single_player(width=4, height=6, num_unique_cards=12)
+    end_time = time.time()
+    print(f"⏱️ Time taken: {end_time - start_time:.5f} seconds\n")
 
     print("\n" + "=" * 70)
     print("✅ All simulation tests completed!")

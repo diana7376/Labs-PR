@@ -683,10 +683,34 @@
             }
         });
 
-        // Remove the old newGame function and replace with a simplified version that uses settings
         async function newGame() {
-            // Open settings modal to configure new game
-            showSettings();
+            const width = parseInt(document.getElementById('board-width').value);
+            const height = parseInt(document.getElementById('board-height').value);
+            playerId = document.getElementById('player-id').value;
+
+            try {
+                const response = await fetch(`${API_URL}/games/new`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ width, height, player_id: playerId })
+});
+
+
+
+                const data = await response.json();
+
+                if (data.ok) {
+                    currentGameId = data.game_id;
+                    document.getElementById('board-size').textContent = `${width}x${height}`;
+                    showStatus('Game started! Find matching pairs!', 'success');
+                    renderBoard(data.board);
+                    updateScore(data.scores);
+                } else {
+                    showStatus('Error: ' + data.message, 'error');
+                }
+            } catch (error) {
+                showStatus('Failed to create game: ' + error.message, 'error');
+            }
         }
 
         async function flipCard(row, col) {
@@ -763,27 +787,26 @@
                     const card = document.createElement('div');
                     card.className = 'card';
 
-                    // Check if card was removed (matched pair removed from board)
+                    // CRITICAL FIX: Check controlled_by for true matches
                     if (space.card === null) {
-                        // Card was removed - show empty space or checkmark
+                        // Card was removed (matched pair removed from board)
                         card.classList.add('removed');
                         card.textContent = '✓';
                     } else if (space.controlled_by !== null && space.controlled_by !== undefined) {
-                        // Card is MATCHED and controlled by a player - remove it immediately
-                        card.classList.add('removed');
-                        card.textContent = '✓';
-                        card.style.pointerEvents = 'none';
+                        // Card is MATCHED and controlled by a player (GREEN)
+                        card.classList.add('matched');
+                        card.textContent = space.card;
                     } else if (space.is_face_up) {
                         // Card is face-up but NOT matched (temporary - YELLOW)
                         card.classList.add('face-up');
                         card.textContent = space.card;
                     } else {
-                        // Card is face-down (PINK)
+                        // Card is face-down (BLUE)
                         card.textContent = '?';
                     }
 
                     // Click handler - only allow clicks on non-matched, non-removed cards
-                    if (!card.classList.contains('removed')) {
+                    if (!card.classList.contains('matched') && !card.classList.contains('removed')) {
                         card.addEventListener('click', () => flipCard(y, x));
                     }
 
@@ -806,19 +829,19 @@
         }
 
         // Update board preview text in settings modal
-function updateBoardPreview(width, height) {
-    const previewElement = document.getElementById('settings-board-preview');
-    previewElement.textContent = `${width}x${height} (${width * height} cards)`;
-}
+        function updateBoardPreview(width, height) {
+            const previewElement = document.getElementById('settings-board-preview');
+            previewElement.textContent = `${width}x${height} (${width * height} cards)`;
+        }
 
-// Event listeners for settings inputs
-document.getElementById('settings-width').addEventListener('input', (e) => {
-    updateBoardPreview(e.target.value, document.getElementById('settings-height').value);
-});
+        // Event listeners for settings inputs
+        document.getElementById('settings-width').addEventListener('input', (e) => {
+            updateBoardPreview(e.target.value, document.getElementById('settings-height').value);
+        });
 
-document.getElementById('settings-height').addEventListener('input', (e) => {
-    updateBoardPreview(document.getElementById('settings-width').value, e.target.value);
-});
+        document.getElementById('settings-height').addEventListener('input', (e) => {
+            updateBoardPreview(document.getElementById('settings-width').value, e.target.value);
+        });
 
     </script>
 </body>

@@ -371,3 +371,30 @@ class TestToString:
 
         # Strings should be different
         assert str_before != str_after
+
+def main():
+    test_classes = [
+        TestBoardInitialization,
+        TestGetters,
+        TestFlipCard,
+        TestControl,
+        TestRemoveCard,
+        TestParseFromFile,
+        TestRepInvariants,
+        TestToString
+    ]
+
+    instance_methods = []
+    for cls in test_classes:
+        test_obj = cls()
+        for attr in dir(test_obj):
+            if attr.startswith("test") and callable(getattr(test_obj, attr)):
+                instance_methods.append(getattr(test_obj, attr))
+
+    for test_func in instance_methods:
+        print("Running:", test_func.__name__)
+        test_func()
+    print("All Board tests executed.")
+
+if __name__ == "__main__":
+    main()

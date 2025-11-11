@@ -144,4 +144,4 @@ if __name__ == "__main__":
     print("\n" + "=" * 60)
     asyncio.run(test_concurrent_high_contention())
 
-    print("\n✅ All concurrent tests passed!")
+    print("\n All concurrent tests passed!")

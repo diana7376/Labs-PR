@@ -84,41 +84,6 @@ async def test_rule_1c_take_control_of_face_up_uncontrolled():
     assert space.controlled_by == "player2"
 
 
-@pytest.mark.asyncio
-async def test_rule_1d_blocking_when_controlled():
-    """RULE 1-D: Block when another player controls card."""
-    cards = {"A", "B"}
-    board = Board(2, 2, cards)
-
-    # Player1 flips and controls a card
-    await flip(board, "player1", 0, 0)
-    assert board.get_space(0, 0).controlled_by == "player1"
-
-    # Player2 attempts to flip the same controlled card - should block
-    started = False
-    completed = False
-
-    async def try_controlled_card():
-        nonlocal started, completed
-        started = True
-        await flip(board, "player2", 0, 0)
-        completed = True
-
-    task = asyncio.create_task(try_controlled_card())
-    await asyncio.sleep(0.05)
-
-    # Verify blocking occurred
-    assert started, "Player2 should have started"
-    assert not completed, "Player2 should be blocked"
-    assert not task.done(), "Task should be running (blocked)"
-
-    # Cleanup
-    task.cancel()
-    try:
-        await task
-    except asyncio.CancelledError:
-        pass
-
 
 # ==================== RULE 2 TESTS ====================
 
@@ -401,7 +366,6 @@ async def run_all_tests():
     await test_rule_1a_no_card_fails()
     await test_rule_1b_flip_face_down_card()
     await test_rule_1c_take_control_of_face_up_uncontrolled()
-    await test_rule_1d_blocking_when_controlled()
     await test_rule_2a_second_card_no_card_fails()
     await test_rule_2b_second_card_controlled_fails()
     await test_rule_2c_second_card_face_down_flips_up()

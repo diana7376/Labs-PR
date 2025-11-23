@@ -15,8 +15,7 @@ def get_value(key):
     return jsonify({'key': key, 'value': value})
 
 # ---------- Replication and Quorum Logic ----------
-
-FOLLOWERS = os.environ.get('FOLLOWERS').split(',')
+FOLLOWERS = os.environ.get('FOLLOWERS', '').split(',')
 WRITE_QUORUM = int(os.environ.get('WRITE_QUORUM', '3'))
 MIN_DELAY = float(os.environ.get('MIN_DELAY', '0.0001'))
 MAX_DELAY = float(os.environ.get('MAX_DELAY', '0.001'))
@@ -26,20 +25,24 @@ def put_value(key):
     value = request.json['value']
     store[key] = value  # write locally
 
-    # Replication
+    # Replication (send to followers in parallel)
     results = []
+    results_lock = threading.Lock()
+
     def replicate(follower_url):
         delay = random.uniform(MIN_DELAY, MAX_DELAY)
         time.sleep(delay)
         try:
             resp = requests.post(
                 f"http://{follower_url}/replicate/{key}",
-                json={"value": value}
+                json={"value": value},
+                timeout=2
             )
-            if resp.status_code == 200:
-                results.append(True)
+            with results_lock:
+                results.append(resp.status_code == 200)
         except Exception:
-            results.append(False)
+            with results_lock:
+                results.append(False)
 
     threads = []
     for follower in FOLLOWERS:
@@ -50,12 +53,19 @@ def put_value(key):
     # Wait for quorum
     start = time.time()
     while True:
-        if results.count(True) >= WRITE_QUORUM:
+        with results_lock:
+            success_count = results.count(True)
+            total_count = len(results)
+        if success_count >= WRITE_QUORUM:
             latency = time.time() - start
             return jsonify({'status': 'ok', 'latency': latency}), 200
-        if len(results) == len(FOLLOWERS):
+        if total_count == len(FOLLOWERS):
             break
         time.sleep(0.001)
 
     latency = time.time() - start
     return jsonify({'status': 'fail', 'latency': latency}), 500
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8000))  # Default to 8000 for leader
+    app.run(host="0.0.0.0", port=port, threaded=True)

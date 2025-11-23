@@ -11,12 +11,12 @@ RUN pip install flask requests
 COPY . /app
 
 # Expose ports for leader and followers
-EXPOSE 5000
-EXPOSE 5001
-EXPOSE 5002
-EXPOSE 5003
-EXPOSE 5004
-EXPOSE 5005
+EXPOSE 8000
+EXPOSE 8001
+EXPOSE 8002
+EXPOSE 8003
+EXPOSE 8004
+EXPOSE 8005
 
 # Choose entry point based on ROLE environment variable
 CMD ["sh", "-c", "if [ \"$ROLE\" = \"leader\" ]; then python leader.py; else python follower.py; fi"]

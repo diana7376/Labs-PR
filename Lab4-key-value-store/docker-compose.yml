@@ -1,0 +1,58 @@
+version: '3'
+services:
+  leader:
+    build: .
+    environment:
+      - ROLE=leader
+      - FOLLOWERS=follower1:5001,follower2:5002,follower3:5003,follower4:5004,follower5:5005
+      - WRITE_QUORUM=3
+      - MIN_DELAY=0.0001
+      - MAX_DELAY=0.001
+    ports:
+      - "5000:5000"
+    depends_on:
+      - follower1
+      - follower2
+      - follower3
+      - follower4
+      - follower5
+
+  follower1:
+    build: .
+    environment:
+      - ROLE=follower
+      - PORT=5001
+    ports:
+      - "5001:5001"
+
+  follower2:
+    build: .
+    environment:
+      - ROLE=follower
+      - PORT=5002
+    ports:
+      - "5002:5002"
+
+  follower3:
+    build: .
+    environment:
+      - ROLE=follower
+      - PORT=5003
+    ports:
+      - "5003:5003"
+
+  follower4:
+    build: .
+    environment:
+      - ROLE=follower
+      - PORT=5004
+    ports:
+      - "5004:5004"
+
+  follower5:
+    build: .
+    environment:
+      - ROLE=follower
+      - PORT=5005
+    ports:
+      - "5005:5005"

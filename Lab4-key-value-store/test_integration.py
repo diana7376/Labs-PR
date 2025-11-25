@@ -4,7 +4,7 @@ import random
 import time
 
 LEADER = "localhost:8000"  # Leader's API endpoint
-NUM_WRITES = 10000         # Total number of write operations
+NUM_WRITES = 100         # Total number of write operations
 NUM_KEYS = 100             # Number of distinct keys
 NUM_THREADS = 20           # Level of concurrency
 

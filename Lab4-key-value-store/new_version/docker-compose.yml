@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  leader:
+    build: ./app
+    environment:
+      - ROLE=leader
+      - FOLLOWERS=http://follower-1:80,http://follower-2:80,http://follower-3:80,http://follower-4:80,http://follower-5:80
+      # This variable will be overridden by our benchmark script
+      - WRITE_QUORUM=${WRITE_QUORUM:-1}
+      - MIN_DELAY=0
+      - MAX_DELAY=1000
+    ports:
+      - "8000:80"
+
+  follower-1:
+    build: ./app
+    environment:
+      - ROLE=follower
+
+  follower-2:
+    build: ./app
+    environment:
+      - ROLE=follower
+
+  follower-3:
+    build: ./app
+    environment:
+      - ROLE=follower
+
+  follower-4:
+    build: ./app
+    environment:
+      - ROLE=follower
+
+  follower-5:
+    build: ./app
+    environment:
+      - ROLE=follower

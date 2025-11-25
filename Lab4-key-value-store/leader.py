@@ -17,8 +17,8 @@ def get_value(key):
 # ---------- Replication and Quorum Logic ----------
 FOLLOWERS = os.environ.get('FOLLOWERS', '').split(',')
 WRITE_QUORUM = int(os.environ.get('WRITE_QUORUM', '3'))
-MIN_DELAY = float(os.environ.get('MIN_DELAY', '0.0001'))
-MAX_DELAY = float(os.environ.get('MAX_DELAY', '0.001'))
+MIN_DELAY = float(os.environ.get('MIN_DELAY', '0'))
+MAX_DELAY = float(os.environ.get('MAX_DELAY', '1000'))
 
 @app.route('/put/<key>', methods=['POST'])
 def put_value(key):

@@ -72,7 +72,7 @@ def check_consistency():
 
     mismatches = 0
     for i in range(1, 6):
-        container_name = f"distributed_lab-follower-{i}-1"  # Adjust based on folder name
+        container_name = f"kv-follower-{i}"
         # A trick to curl from inside the container since we didn't map follower ports to host
         cmd = f"docker exec {container_name} curl -s http://localhost:80/data"
         try:

@@ -17,23 +17,28 @@ services:
     build: ./app
     environment:
       - ROLE=follower
+    container_name: kv-follower-1
 
   follower-2:
     build: ./app
     environment:
       - ROLE=follower
+    container_name: kv-follower-2
 
   follower-3:
     build: ./app
     environment:
       - ROLE=follower
+    container_name: kv-follower-3
 
   follower-4:
     build: ./app
     environment:
       - ROLE=follower
+    container_name: kv-follower-4
 
   follower-5:
     build: ./app
     environment:
       - ROLE=follower
+    container_name: kv-follower-5
